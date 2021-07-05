@@ -1,0 +1,31 @@
+{
+  "name": "eslint-plugin-react-i18n",
+  "version": "1.0.0",
+  "description": "ESLint plugin for enforcing i18n best practice",
+  "main": "src/index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xiaoyunyang/eslint-plugin-react-i18n.git"
+  },
+  "keywords": [
+    "eslint",
+    "react",
+    "lingui",
+    "i18n"
+  ],
+  "author": "xiaoyunyang",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/xiaoyunyang/eslint-plugin-react-i18n/issues"
+  },
+  "homepage": "https://github.com/xiaoyunyang/eslint-plugin-react-i18n#readme",
+  "dependencies": {
+    "eslint-plugin-react-i18n": "../eslint-plugin-react-i18n"
+  }
+}
