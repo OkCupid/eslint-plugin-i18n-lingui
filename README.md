@@ -30,5 +30,5 @@ ESLint Plugin to enforce i18n best practices.
 
 | Has Fixer | Rule                               | Description                                             |
 |-----------|------------------------------------|---------------------------------------------------------|
-|           | no-eval-in-placeholder             | No evaluation of placeholder values in wrapped strings  |
-|    ✔️      | react-i18n/prefer-unicode-ellipsis | Detects three periods in Trans or t tag wrapped strings |
+|           | [no-eval-in-placeholder](https://github.com/xiaoyunyang/eslint-plugin-react-i18n/blob/main/docs/rules/no-eval-in-placeholder.md)             | No evaluation of placeholder values in wrapped strings  |
+|    ✔️      | [react-i18n/prefer-unicode-ellipsis](https://github.com/xiaoyunyang/eslint-plugin-react-i18n/blob/main/docs/rules/prefer-unicode-ellipsis.md) | Detects three periods in Trans or t tag wrapped strings |
