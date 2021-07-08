@@ -15,13 +15,19 @@ Enforces unicode ellipsis in localized source string.
 Examples of **incorrect** code for this rule:
 
 ```js
-const Message = ({ numberOfLikes }) => 
-    <Trans>LOADING...</Trans>;
+<Trans>LOADING...</Trans>;
+```
+
+```js
+const hello = t`...Hello...`
 ```
 
 Examples of **correct** code for this rule:
 
 ```js
-const Message = ({ numberOfLikes }) => 
-    <Trans>LOADING…</Trans>;
+<Trans>LOADING…</Trans>;
+```
+
+```js
+const hello = t`…Hello…`
 ```
