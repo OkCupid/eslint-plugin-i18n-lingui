@@ -5,7 +5,7 @@ const hasOpeningElementTrans = require("../util/hasOpeningElementTrans");
 module.exports = {
     meta: {
         docs: {
-            url: "https://github.com/xiaoyunyang/eslint-plugin-react-i18n/tree/main/docs/rules/no-eval-in-placeholder.md"
+            url: "https://github.com/OkCupid/eslint-plugin-i18n-lingui/blob/main/docs/rules/no-eval-in-placeholder.md"
         }
     },
     create: function (context) {

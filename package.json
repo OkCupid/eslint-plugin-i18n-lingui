@@ -1,17 +1,14 @@
 {
-  "name": "eslint-plugin-react-i18n",
+  "name": "eslint-plugin-i18n-lingui",
   "version": "1.0.0",
-  "description": "ESLint plugin for enforcing i18n best practice",
+  "description": "ESLint plugin for enforcing i18n best practices.",
   "main": "src/index.js",
   "directories": {
     "doc": "docs"
   },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xiaoyunyang/eslint-plugin-react-i18n.git"
+    "url": "git+https://github.com/OkCupid/eslint-plugin-i18n-lingui.git"
   },
   "keywords": [
     "eslint",
@@ -19,13 +16,10 @@
     "lingui",
     "i18n"
   ],
-  "author": "xiaoyunyang",
-  "license": "ISC",
+  "author": "OkCupid",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/xiaoyunyang/eslint-plugin-react-i18n/issues"
+    "url": "https://github.com/OkCupid/eslint-plugin-i18n-lingui/issues"
   },
-  "homepage": "https://github.com/xiaoyunyang/eslint-plugin-react-i18n#readme",
-  "dependencies": {
-    "eslint-plugin-react-i18n": "../eslint-plugin-react-i18n"
-  }
+  "homepage": "https://github.com/OkCupid/eslint-plugin-i18n-lingui#readme"
 }

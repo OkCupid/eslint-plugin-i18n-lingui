@@ -12,7 +12,7 @@ const hasEllipsis = (s) => THREE_PERIODS_REGEX.test(s);
 module.exports = {
     meta: {
         docs: {
-            url: "https://github.com/xiaoyunyang/eslint-plugin-react-i18n/tree/main/docs/rules/prefer-unicode-ellipsis.md"
+            url: "https://github.com/OkCupid/eslint-plugin-i18n-lingui/blob/main/docs/rules/prefer-unicode-ellipsis.md"
         },
         fixable: "ellipsis"
     },
