@@ -7,7 +7,7 @@ Prohibits evaluation inside of placeholders of localized strings to ensure named
 ```json
 {    
     "rules": {
-        "react-i18n/no-eval-in-placeholder": 2
+        "i18n-lingui/no-eval-in-placeholder": 2
     }
 }
 ```

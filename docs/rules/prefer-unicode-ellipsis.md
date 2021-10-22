@@ -7,7 +7,7 @@ Enforces unicode ellipsis in localized source string.
 ```json
 {    
     "rules": {
-        "react-i18n/prefer-unicode-ellipsis": 2
+        "i18n-lingui/prefer-unicode-ellipsis": 2
     }
 }
 ```
