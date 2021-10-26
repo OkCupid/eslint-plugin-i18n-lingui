@@ -12,6 +12,8 @@
   },
   "keywords": [
     "eslint",
+    "eslint-plugin",
+    "eslintplugin",
     "react",
     "lingui",
     "i18n"
