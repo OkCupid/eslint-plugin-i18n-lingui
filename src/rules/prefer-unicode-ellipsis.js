@@ -51,8 +51,8 @@ module.exports = {
                 message: REPORT_MESSAGE,
                 fix: function (fixer) {
                   const fixedText = offendingNode.value.raw.replace(THREE_PERIODS_REGEX, ELLIPSIS_UNICODE);
-                  const { start, end } = offendingNode;
-                  const range = [start, end];
+                  const [start, end] = offendingNode.range
+                  const range = [start + 1, end - 1];
                   return fixer.replaceTextRange(range, fixedText);
                 }
               });
