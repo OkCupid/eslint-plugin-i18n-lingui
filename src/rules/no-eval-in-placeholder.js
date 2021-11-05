@@ -2,6 +2,11 @@
 
 const hasOpeningElementTrans = require("../util/hasOpeningElementTrans");
 
+const disallowedExpressionTypes = [
+  "BinaryExpression",
+  "UnaryExpression"
+];
+
 module.exports = {
     meta: {
         docs: {
@@ -9,18 +14,18 @@ module.exports = {
         }
     },
     create: function (context) {
-        const childWithEval = (node) => node.children.find(
-            c => c.type === "JSXExpressionContainer" && c.expression.type !== "Identifier"
+        const childWithDisallowedEval = (node) => node.children.find(
+          c => c.type === "JSXExpressionContainer" && disallowedExpressionTypes.includes(c.expression.type)
         );
 
         return {
             JSXElement(node) {
             if(
                  hasOpeningElementTrans(node)
-              && childWithEval(node)
+              && childWithDisallowedEval(node)
             ) {
               context.report({
-                node: childWithEval(node),
+                node: childWithDisallowedEval(node),
                 message: "No evaluation inside placeholder of localized string"
               });
             }
