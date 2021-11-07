@@ -2,29 +2,39 @@
 
 ESLint Plugin to enforce i18n best practices.
 
+You should use this plugin if:
+
+1. You use [lingui](https://github.com/lingui/js-lingui) to localize your application.
+2. You want to avoid common pitfalls in wrapping source strings that could result poor quality translations.
+
 ## Installation
 
-### Local Development
+```
+npm install eslint-plugin-i18n-lingui --save-dev
+```
 
-1. clone the repo in the parent directory of your project
-2. Add the plugin to your project's `node_modules`:
-    ```
-    $ yarn add ../eslint-plugin-i18n-lingui --save-dev
-    ```
-3. In your project's `.eslintrc.js`, add
+```
+yarn add eslint-plugin-i18n-lingui --dev
+```
 
-    ```js
-    module.exports = {
-        ...
-        plugins: [
-            "i18n-lingui"
-        ],
-        rules: {
-            "i18n-lingui/no-eval-in-placeholder": 1, // warning
-            "i18n-lingui/prefer-unicode-ellipsis": 2, // error
-        }
-    }
-    ```
+## Usage
+
+Add `i18n-lingui` to the plugins section of your `.eslintrc` configuration file. You can omit the `eslint-plugin-` prefix.
+
+```js
+plugins: [
+    "i18n-lingui"
+]
+```
+
+Then configure the rules you want to use under the `rules` section.
+
+```js
+rules: {
+    "i18n-lingui/no-eval-in-placeholder": 1, // warning
+    "i18n-lingui/prefer-unicode-ellipsis": 2, // error
+}
+```
 
 ## List of supported rules
 
