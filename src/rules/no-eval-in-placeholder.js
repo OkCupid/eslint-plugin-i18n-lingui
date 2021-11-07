@@ -20,7 +20,19 @@ module.exports = {
         );
 
         return {
-            JSXElement(node) {
+          TaggedTemplateExpression(node) {
+            // check tag has name t
+              if (!node.tag || node.tag.name !== "t") return;
+              if (!node.quasi || !node.quasi.expressions) return;
+              const candidates = node.quasi.expressions
+              const offendingNode = candidates.find((c) => disallowedExpressionTypes.includes(c.type))
+              if(!offendingNode) return;
+              context.report({
+                node: offendingNode,
+                message: "No evaluation inside placeholder of localized string"
+              })
+          },
+          JSXElement(node) {
             if(
                  hasOpeningElementTrans(node)
               && childWithDisallowedEval(node)
