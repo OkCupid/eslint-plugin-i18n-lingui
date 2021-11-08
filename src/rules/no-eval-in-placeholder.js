@@ -17,9 +17,20 @@ module.exports = {
         }
     },
     create: function (context) {
-        const childWithDisallowedEval = (node) => node.children.find(
-          c => c.type === "JSXExpressionContainer" && disallowedExpressionTypes.includes(c.expression.type)
-        );
+        const getChildWithDisallowedEval = (node) => {
+          for(let i=0; i<node.children.length; i+=1) {
+            const c = node.children[i]
+            if(
+              c.type === "JSXExpressionContainer" && disallowedExpressionTypes.includes(c.expression.type)
+            ) {
+              return c
+            }
+            if (c.type === "JSXElement") {
+              return getChildWithDisallowedEval(c)
+            }
+          }
+          return null;
+        }
 
         return {
           TaggedTemplateExpression(node) {
@@ -35,12 +46,13 @@ module.exports = {
               })
           },
           JSXElement(node) {
+            const childWithDisallowedEval = getChildWithDisallowedEval(node);
             if(
-                 hasOpeningElementTrans(node)
-              && childWithDisallowedEval(node)
+              hasOpeningElementTrans(node)
+              && childWithDisallowedEval
             ) {
               context.report({
-                node: childWithDisallowedEval(node),
+                node: childWithDisallowedEval,
                 message: "No evaluation inside placeholder of localized string"
               });
             }
