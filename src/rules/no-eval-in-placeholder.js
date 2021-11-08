@@ -1,6 +1,7 @@
 "use strict";
 
 const hasOpeningElementTrans = require("../util/hasOpeningElementTrans");
+const isTaggedNode = require("../util/isTaggedNode");
 
 const disallowedExpressionTypes = [
   "BinaryExpression",
@@ -34,16 +35,15 @@ module.exports = {
 
         return {
           TaggedTemplateExpression(node) {
-            // check tag has name t
-              if (!node.tag || node.tag.name !== "t") return;
-              if (!node.quasi || !node.quasi.expressions) return;
-              const candidates = node.quasi.expressions
-              const offendingNode = candidates.find((c) => disallowedExpressionTypes.includes(c.type))
-              if(!offendingNode) return;
-              context.report({
-                node: offendingNode,
-                message: "No evaluation inside placeholder of localized string"
-              })
+            if(!isTaggedNode(node)) return;
+            if (!node.quasi || !node.quasi.expressions) return;
+            const candidates = node.quasi.expressions
+            const offendingNode = candidates.find((c) => disallowedExpressionTypes.includes(c.type))
+            if(!offendingNode) return;
+            context.report({
+              node: offendingNode,
+              message: "No evaluation inside placeholder of localized string"
+            })
           },
           JSXElement(node) {
             const childWithDisallowedEval = getChildWithDisallowedEval(node);
