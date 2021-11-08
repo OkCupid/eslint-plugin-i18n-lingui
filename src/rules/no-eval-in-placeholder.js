@@ -5,7 +5,9 @@ const hasOpeningElementTrans = require("../util/hasOpeningElementTrans");
 const disallowedExpressionTypes = [
   "BinaryExpression",
   "UnaryExpression",
-  "CallExpression"
+  "CallExpression",
+  "MemberExpression",
+  "ChainExpression"
 ];
 
 module.exports = {
