@@ -14,7 +14,7 @@ module.exports = {
         docs: {
             url: "https://github.com/OkCupid/eslint-plugin-i18n-lingui/blob/main/docs/rules/prefer-unicode-ellipsis.md"
         },
-        fixable: "ellipsis"
+        fixable: "code"
     },
     create: function (context) {
         const childWithThreePeriods = (node) => node.children.find(c => hasEllipsis(c.value));
