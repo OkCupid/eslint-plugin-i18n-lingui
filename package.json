@@ -34,5 +34,8 @@
   },
   "dependencies": {
     "requireindex": "^1.2.0"
+  },
+  "engines": {
+    "node": "^12.22.0 || ^14.17.0 || >=16.0.0"
   }
 }
