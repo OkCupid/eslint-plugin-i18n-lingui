@@ -12,7 +12,7 @@ const hasEllipsis = (s) => THREE_PERIODS_REGEX.test(s);
 module.exports = {
     meta: {
         docs: {
-            url: "https://github.com/OkCupid/eslint-plugin-i18n-lingui/blob/main/docs/rules/prefer-unicode-ellipsis.md"
+            url: "https://github.com/OkCupid/eslint-plugin-i18n-lingui/blob/main/docs/rules/prefer-unicode-ellipsis.md",
         },
         fixable: "code",
         schema: [],
@@ -35,7 +35,7 @@ module.exports = {
                     fix: function(fixer) {
                         const fixedText = offendingNode.raw.replace(THREE_PERIODS_REGEX, ELLIPSIS_UNICODE);
                         return fixer.replaceText(offendingNode, fixedText);
-                    }
+                    },
                 });
             },
             TaggedTemplateExpression(node) {
@@ -55,9 +55,9 @@ module.exports = {
                         const [start, end] = offendingNode.range;
                         const range = [start + 1, end - 1];
                         return fixer.replaceTextRange(range, fixedText);
-                    }
+                    },
                 });
-            }
+            },
         };
-    }
+    },
 };
