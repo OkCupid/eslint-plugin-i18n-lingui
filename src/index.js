@@ -5,4 +5,4 @@ module.exports = {
         "no-useless-string-wrapping": require("./rules/no-useless-string-wrapping"),
         "prefer-smartquote": require("./rules/prefer-smartquote"),
     },
-}
+};
