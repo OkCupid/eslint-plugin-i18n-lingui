@@ -12,6 +12,7 @@ module.exports = {
         "indent": ["error", 4],
         "keyword-spacing": 2,
         "semi": 2,
+        "comma-dangle": ["error", "always-multiline"],
         // TODO: enable
         'eslint-plugin/prefer-message-ids': 'off',
         'eslint-plugin/prefer-placeholders': 'off',
@@ -25,5 +26,5 @@ module.exports = {
           'https://github.com/OkCupid/eslint-plugin-i18n-lingui/blob/main/docs/rules/{{name}}.md',
             },
         ],
-    }
+    },
 };

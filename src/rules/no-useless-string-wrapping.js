@@ -6,7 +6,7 @@ const isTaggedNode = require("../util/isTaggedNode");
 module.exports = {
     meta: {
         docs: {
-            url: "https://github.com/OkCupid/eslint-plugin-i18n-lingui/blob/main/docs/rules/no-useless-string-wrapping.md"
+            url: "https://github.com/OkCupid/eslint-plugin-i18n-lingui/blob/main/docs/rules/no-useless-string-wrapping.md",
         },
         schema: [],
     },
@@ -23,7 +23,7 @@ module.exports = {
 
                 context.report({
                     node,
-                    message: "No useless wrapped strings."
+                    message: "No useless wrapped strings.",
                 });
             },
             JSXElement(node) {
@@ -32,10 +32,10 @@ module.exports = {
                     if (!isUseless) return;
                     context.report({
                         node,
-                        message: "No useless wrapped strings"
+                        message: "No useless wrapped strings",
                     });
                 }
-            }
+            },
         };
-    }
+    },
 };
