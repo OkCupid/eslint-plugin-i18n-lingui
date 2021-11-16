@@ -14,20 +14,21 @@ module.exports = {
         docs: {
             url: "https://github.com/OkCupid/eslint-plugin-i18n-lingui/blob/main/docs/rules/prefer-unicode-ellipsis.md"
         },
-        fixable: "ellipsis"
+        fixable: "code",
+        schema: [],
     },
     create: function (context) {
         const childWithThreePeriods = (node) => node.children.find(c => hasEllipsis(c.value));
 
         return {
             JSXElement(node) {
-              
+
               if(!hasOpeningElementTrans(node)) return;
-              
+
               const offendingNode = childWithThreePeriods(node);
 
               if (!offendingNode) return;
-              
+
               context.report({
                 node: offendingNode,
                 message: REPORT_MESSAGE,
@@ -41,9 +42,9 @@ module.exports = {
               // check tag has name t
               if (!node.tag || node.tag.name !== "t") return;
               if (!node.quasi || !node.quasi.quasis) return;
-        
+
               const candidates = node.quasi.quasis;
-        
+
               const offendingNode = candidates.find((c) => hasEllipsis(c.value.raw));
               if (!offendingNode) return;
               context.report({

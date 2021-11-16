@@ -23,5 +23,13 @@
   "bugs": {
     "url": "https://github.com/OkCupid/eslint-plugin-i18n-lingui/issues"
   },
-  "homepage": "https://github.com/OkCupid/eslint-plugin-i18n-lingui#readme"
+  "homepage": "https://github.com/OkCupid/eslint-plugin-i18n-lingui#readme",
+  "scripts": {
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "eslint": "^8.2.0",
+    "eslint-plugin-eslint-plugin": "^4.0.2",
+    "eslint-plugin-node": "^11.1.0"
+  }
 }

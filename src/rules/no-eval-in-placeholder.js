@@ -15,7 +15,8 @@ module.exports = {
     meta: {
         docs: {
             url: "https://github.com/OkCupid/eslint-plugin-i18n-lingui/blob/main/docs/rules/no-eval-in-placeholder.md"
-        }
+        },
+        schema: [],
     },
     create: function (context) {
         const getChildWithDisallowedEval = (node) => {
