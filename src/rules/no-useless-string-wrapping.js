@@ -14,7 +14,7 @@ module.exports = {
         return {
             TaggedTemplateExpression(node) {
                 if (!isTaggedNode(node)) return;
-                if(
+                if (
                     node.quasi.expressions.length !== 1 ||
                     node.quasi.quasis.filter(q => q.value.raw !== "").length > 0
                 ) {
@@ -27,15 +27,15 @@ module.exports = {
                 });
             },
             JSXElement(node) {
-                if(hasOpeningElementTrans(node)) {
+                if (hasOpeningElementTrans(node)) {
                     const isUseless = node.children.length === 1 && node.children[0].type === "JSXExpressionContainer";
-                    if(!isUseless) return;
+                    if (!isUseless) return;
                     context.report({
                         node,
                         message: "No useless wrapped strings"
                     });
                 }
             }
-        }
+        };
     }
-}
+};

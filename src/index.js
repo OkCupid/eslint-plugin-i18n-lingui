@@ -4,4 +4,4 @@ module.exports = {
         "prefer-unicode-ellipsis": require("./rules/prefer-unicode-ellipsis"),
         "no-useless-string-wrapping": require("./rules/no-useless-string-wrapping"),
     },
-}
+};
