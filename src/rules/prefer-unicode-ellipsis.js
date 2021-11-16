@@ -12,7 +12,7 @@ const hasEllipsis = (s) => THREE_PERIODS_REGEX.test(s);
 module.exports = {
     meta: {
         docs: {
-            url: "https://github.com/OkCupid/eslint-plugin-i18n-lingui/blob/main/docs/rules/prefer-unicode-ellipsis.md"
+            url: "https://github.com/OkCupid/eslint-plugin-i18n-lingui/blob/main/docs/rules/prefer-unicode-ellipsis.md",
         },
         fixable: "code",
         schema: [],
@@ -23,41 +23,41 @@ module.exports = {
         return {
             JSXElement(node) {
 
-              if(!hasOpeningElementTrans(node)) return;
+                if (!hasOpeningElementTrans(node)) return;
 
-              const offendingNode = childWithThreePeriods(node);
+                const offendingNode = childWithThreePeriods(node);
 
-              if (!offendingNode) return;
+                if (!offendingNode) return;
 
-              context.report({
-                node: offendingNode,
-                message: REPORT_MESSAGE,
-                fix: function(fixer) {
-                  const fixedText = offendingNode.raw.replace(THREE_PERIODS_REGEX, ELLIPSIS_UNICODE)
-                  return fixer.replaceText(offendingNode, fixedText)
-                }
-              });
+                context.report({
+                    node: offendingNode,
+                    message: REPORT_MESSAGE,
+                    fix: function(fixer) {
+                        const fixedText = offendingNode.raw.replace(THREE_PERIODS_REGEX, ELLIPSIS_UNICODE);
+                        return fixer.replaceText(offendingNode, fixedText);
+                    },
+                });
             },
             TaggedTemplateExpression(node) {
-              // check tag has name t
-              if (!node.tag || node.tag.name !== "t") return;
-              if (!node.quasi || !node.quasi.quasis) return;
+                // check tag has name t
+                if (!node.tag || node.tag.name !== "t") return;
+                if (!node.quasi || !node.quasi.quasis) return;
 
-              const candidates = node.quasi.quasis;
+                const candidates = node.quasi.quasis;
 
-              const offendingNode = candidates.find((c) => hasEllipsis(c.value.raw));
-              if (!offendingNode) return;
-              context.report({
-                node: offendingNode,
-                message: REPORT_MESSAGE,
-                fix: function (fixer) {
-                  const fixedText = offendingNode.value.raw.replace(THREE_PERIODS_REGEX, ELLIPSIS_UNICODE);
-                  const [start, end] = offendingNode.range
-                  const range = [start + 1, end - 1];
-                  return fixer.replaceTextRange(range, fixedText);
-                }
-              });
-            }
-        }
-    }
-}
+                const offendingNode = candidates.find((c) => hasEllipsis(c.value.raw));
+                if (!offendingNode) return;
+                context.report({
+                    node: offendingNode,
+                    message: REPORT_MESSAGE,
+                    fix: function (fixer) {
+                        const fixedText = offendingNode.value.raw.replace(THREE_PERIODS_REGEX, ELLIPSIS_UNICODE);
+                        const [start, end] = offendingNode.range;
+                        const range = [start + 1, end - 1];
+                        return fixer.replaceTextRange(range, fixedText);
+                    },
+                });
+            },
+        };
+    },
+};
