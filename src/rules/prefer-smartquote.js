@@ -65,7 +65,7 @@ const getReplaceWith = ({
     let numDoubleQuotes = 0;
     for (let i=0; i<nodeText.length; i+=1) {
         if (nodeText[i]===DOUBLE_QUOTE) {
-            if (i === violationOffset) return replaceWith[numDoubleQuotes];
+            if (i === violationOffset) return replaceWith[numDoubleQuotes % 2];
             numDoubleQuotes++;
         }
     }
