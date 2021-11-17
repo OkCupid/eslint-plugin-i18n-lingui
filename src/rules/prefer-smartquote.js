@@ -20,9 +20,9 @@ const shouldExclude = ({excludedRanges, candidateLoc}) => {
         const {start, end} = excludedRanges[i];
         if (
             line >= start.line 
-            && line <= end.line 
+            && line <= end.line
             && column >= start.column 
-            && column <= end.column
+            && column < end.column
         ) {
             return true;
         }
