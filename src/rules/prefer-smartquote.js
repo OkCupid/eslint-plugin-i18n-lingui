@@ -72,14 +72,47 @@ const getReplaceWith = ({
     
     return null;
 };
+const getFixedMultilineNodeText = ({ node, nodeText, violations }) => {
+
+    // Big assumption here is we won't have a dangling double quote.
+    // All the double quote pairs are on the same line
+    const nodeStart = node.loc.start;
+    const lineTexts = nodeText.split("\n");
+    
+    const chars = [];
+    for (let i=0; i<lineTexts.length; i++) {
+        const row = lineTexts[i].split("");
+        chars.push(row);
+    }
+    for (let i=0; i<violations.length; i++) {
+        const violation = violations[i];
+        const row = violation.line-nodeStart.line;
+        const col = violation.column;
+        const replaceWith = getReplaceWith({
+            nodeText: lineTexts[row],
+            violationOffset: col,
+        });
+        if (!replaceWith) continue;
+        chars[row][col] = replaceWith;
+    }
+    
+    const fixedLines = [];
+    for (let i=0; i<chars.length; i++) {
+        const rowText = chars[i].join("");
+        fixedLines.push(rowText);
+    }
+    return fixedLines.join("\n");
+};
 
 const fixNode = ({ node, nodeText, violations }) => fixer => {
     const fixedNodeText = nodeText.split("");
     const nodeStart = node.loc.start;
     const nodeEnd = node.loc.end;
 
-    // TODO: skip if multi-line for now. Implement that later
-    if (nodeStart.line !== nodeEnd.line) return;
+    if (nodeStart.line !== nodeEnd.line) {
+        const fixedNodeText = getFixedMultilineNodeText({ node, nodeText, violations });
+        return fixer.replaceText(node, fixedNodeText);
+    }
     
     for (let i=0; i<violations.length; i+=1) {
         const violationCol = violations[i].column;
