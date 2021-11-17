@@ -51,29 +51,49 @@ const getViolations = ({context, node}) => {
     return violations;
 };
 
-const getFixedNodeText = (nodeText) => {
+const getFixedNodeText = ({ node, nodeText }) => {
+    const excludedRanges = node.children.filter(child => !child.raw).map(({loc}) => loc);
+  
+    // initialize
+    let row = node.loc.start.line;
+  
+    const startCol = node.loc.start.column;
+    let col = startCol;
+  
     const fixedNodeText = nodeText.split("");
     const entitiesReplaced = new Map();
+
     for (let i=0; i<nodeText.length; i++) {
         const char = nodeText[i];
-
+            
         const replaceWith = ENTITIES.get(nodeText[i]);
-      
-        if (!replaceWith) continue;
-  
-        if (!entitiesReplaced.get(char)) {
-            entitiesReplaced.set(char, 0);
+        const candidateLocCol = (node.loc.start.line!==node.loc.end.line) ? col-startCol : col;
+        const candidateLoc = {
+            line: row,
+            column: candidateLocCol,
+        };
+
+        const shouldReplace = !shouldExclude({excludedRanges, candidateLoc});
+        if (shouldReplace && replaceWith) {
+           
+            if (!entitiesReplaced.get(char)) {
+                entitiesReplaced.set(char, 0);
+            }
+        
+            if (typeof replaceWith === "string") {
+                fixedNodeText[i] = replaceWith;
+            } else {
+                fixedNodeText[i] = replaceWith[entitiesReplaced.get(char) % 2];
+            }
+        
+            entitiesReplaced.set(char, entitiesReplaced.get(char)+1);
         }
-  
-        if (typeof replaceWith === "string") {
-            fixedNodeText[i] = replaceWith;
+        if (char === "\n") {
+            row++;
+            col = startCol;
         } else {
-            console.log(entitiesReplaced.get(char));
-            fixedNodeText[i] = replaceWith[entitiesReplaced.get(char) % 2];
+            col++;
         }
-      
-        entitiesReplaced.set(char, entitiesReplaced.get(char)+1);
-      
     }
     return fixedNodeText.join("");
 };
@@ -98,7 +118,10 @@ const getReports = ({ context, node }) => {
             },
             fix: fixer => {
                 return fixer.replaceText(
-                    node, getFixedNodeText(context.getSourceCode().getText(node)),
+                    node, getFixedNodeText({
+                        node, 
+                        nodeText:context.getSourceCode().getText(node),
+                    }),
                 );
             },
         });
