@@ -14,134 +14,113 @@ const ENTITIES = new Map([
     [APOSTROPHE, SMART_APOSTROPHE], 
 ]);
 
+const shouldExclude = ({excludedRanges, candidateLoc}) => {
+    const {line, column} = candidateLoc;
+    for (let i=0; i<excludedRanges.length; i+=1) {
+        const {start, end} = excludedRanges[i];
+        if (
+            line >= start.line 
+            && line <= end.line 
+            && column >= start.column 
+            && column <= end.column
+        ) {
+            return true;
+        }
+    }
+    return false;
+};
+
+const getViolations = ({context, node}) => {
+    const violations = [];
+
+    const { start, end } = node.loc;
+    const excludedRanges = node.children.filter(child => !child.raw).map(({loc}) => loc);
+
+    for (let line=start.line-1; line<end.line; line++) {
+        const lineText = context.getSourceCode().lines[line];
+        for (let i=0; i<lineText.length; i++) {
+            const candidateLoc = {line: line+1, column: i};
+            if (
+                ENTITIES.has(lineText[i]) 
+                && !shouldExclude({excludedRanges, candidateLoc})
+            ) {
+                violations.push(candidateLoc);
+            }
+        }
+    }
+    return violations;
+};
+
 const getReplaceWith = ({
-    node, disallowedEntity, violationCol, siblingNodes,
+    nodeText, violationOffset,
 }) => {
+    const disallowedEntity = nodeText[violationOffset];
     const replaceWith = ENTITIES.get(disallowedEntity);
     // apostrophe
     if (typeof replaceWith === "string") {
         return replaceWith;
     }
-  
+    
     // double quote
-    // TODO: optimization - pass the running list of entities to this function?
-    let entities = [];
-    for (let i=0; i<siblingNodes.length; i+=1) {
-        const raw = siblingNodes[i].raw;
-        if (!raw) continue;
-        const childStart = siblingNodes[i].loc.start;
-        const chars = raw.split("");
-        for (let j=0; j<chars.length; j+=1) {
-            if (chars[j]===DOUBLE_QUOTE) {
-                entities.push({
-                    line: childStart.line,
-                    column: childStart.column+j,
-                });
-            }
+    let numDoubleQuotes = 0;
+    for (let i=0; i<nodeText.length; i+=1) {
+        if (nodeText[i]===DOUBLE_QUOTE) {
+            if (i === violationOffset) return replaceWith[numDoubleQuotes];
+            numDoubleQuotes++;
         }
     }
-  
-    const violationLoc = {
-        line: node.loc.start.line,
-        column: violationCol,
-    };
-  
-    const foundIndex = entities.findIndex(({column}) => 
-        column === violationLoc.column,
-    );
-
-    if (foundIndex === -1) return null;
-    return replaceWith[foundIndex % 2];
+    
+    return null;
 };
-// const getFix = ({ node, disallowedEntity, violationCol, siblingNodes }) => fixer => {
-//   const replaceWith = getReplaceWith({
-//   	node, disallowedEntity, violationCol, siblingNodes
-//   })
-//   if(!replaceWith) return
-  
-//   const fixedText = node.raw.replace(disallowedEntity, replaceWith)
-//   return fixer.replaceText(node, fixedText)  
-// }
 
-const fixNode = ({ node, violations, siblingNodes }) => fixer => {
-    // Fix every violation of the node all at once
-    const fixedRaw = node.raw.split("");
+const fixNode = ({ node, nodeText, violations }) => fixer => {
+    const fixedNodeText = nodeText.split("");
+    const nodeStart = node.loc.start;
+    const nodeEnd = node.loc.end;
+
+    // TODO: skip if multi-line for now. Implement that later
+    if (nodeStart.line !== nodeEnd.line) return;
+    
     for (let i=0; i<violations.length; i+=1) {
-        const disallowedEntity = fixedRaw[violations[i]];
-        const violationCol = node.loc.start.column+violations[i];
-        const replaceWith = getReplaceWith({ node, disallowedEntity, violationCol, siblingNodes});
+        const violationCol = violations[i].column;
+        const offset = violationCol - nodeStart.column;
+        const replaceWith = getReplaceWith({ 
+            nodeText,
+            violationOffset: offset,
+        });
         if (!replaceWith) continue;
-        fixedRaw[violations[i]] = replaceWith;
+        fixedNodeText[offset] = replaceWith;
     }
-  
-    return fixer.replaceText(node, fixedRaw.join(""));
+    return fixer.replaceText(node, fixedNodeText.join(""));
 };
+  
 
-const getReports = ({ context, children }) => {
-    for (let i=0; i<children.length; i+=1) {
-        const child = children[i];
-        const childStart = child.loc.start;
+const getReports = ({ context, node }) => {
+    const violations = getViolations({ context, node });
+    for (let j=0; j<violations.length; j+=1) {
+        const {line, column } = violations[j]; 
         
-        const raw = child.raw;
-    
-        if (!raw) continue;
-    
-        const violations = [];
-        for (let j=0; j<raw.length; j+=1) {
-            if (ENTITIES.has(raw[j])) {
-                violations.push(j); 
-            }
-        }
-        
-        for (let j=0; j<violations.length; j+=1) {
-            const violationCol = childStart.column+violations[j];
-            //const disallowedEntity = child.raw.charAt(violations[j]);
-            
-            // TODO: reports at the wrong place for multi-line
-            
-            context.report({
-                node: child,
-                message: "Prefer smartquote.",
-                loc: {
-                    start: {
-                        line: childStart.line,
-                        column: violationCol,
-                    },
-                    end: {
-                        line: childStart.line,
-                        column: violationCol+1,
-                    },
+        context.report({
+            node,
+            message: "Prefer smartquote.",
+            loc: {
+                start: {
+                    line,
+                    column,
                 },
-                // fix: getFix({
-                //   node: child,
-                //   violationCol,
-                //   disallowedEntity,
-                //   siblingNodes: children 
-                // })
-            });
-            if (violations.length) {
-                context.report({
-                    node: child,
-                    message: "fix this child.",
-                    loc: {
-                        start: {
-                            line: childStart.line,
-                            column: 0,
-                        },
-                        end: {
-                            line: childStart.line,
-                            column: 0,
-                        },
-                    },
-                    fix: fixNode({
-                        node: child,
-                        violations,
-                        siblingNodes: children,
-                    }), 
-                });
-            }
-        }  
-    }
+                end: {
+                    line,
+                    column: column+1,
+                },
+            },
+            fix: fixNode({
+                node,
+                nodeText: context.getSourceCode().getText(node),
+                violations,
+            }),
+        });
+
+    }   
 };
 
 module.exports = {
@@ -156,7 +135,7 @@ module.exports = {
         return {
             JSXElement(node) {
                 if (hasOpeningElementTrans(node)) {
-                    getReports({context, children: node.children});
+                    getReports({context, node});
                 }
             },
         };
