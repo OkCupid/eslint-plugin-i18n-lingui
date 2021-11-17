@@ -51,82 +51,32 @@ const getViolations = ({context, node}) => {
     return violations;
 };
 
-const getReplaceWith = ({
-    nodeText, violationOffset,
-}) => {
-    const disallowedEntity = nodeText[violationOffset];
-    const replaceWith = ENTITIES.get(disallowedEntity);
-    // apostrophe
-    if (typeof replaceWith === "string") {
-        return replaceWith;
-    }
-    
-    // double quote
-    let numDoubleQuotes = 0;
-    for (let i=0; i<nodeText.length; i+=1) {
-        if (nodeText[i]===DOUBLE_QUOTE) {
-            if (i === violationOffset) return replaceWith[numDoubleQuotes % 2];
-            numDoubleQuotes++;
-        }
-    }
-    
-    return null;
-};
-const getFixedMultilineNodeText = ({ node, nodeText, violations }) => {
-
-    // Big assumption here is we won't have a dangling double quote.
-    // All the double quote pairs are on the same line
-    const nodeStart = node.loc.start;
-    const lineTexts = nodeText.split("\n");
-    
-    const chars = [];
-    for (let i=0; i<lineTexts.length; i++) {
-        const row = lineTexts[i].split("");
-        chars.push(row);
-    }
-    for (let i=0; i<violations.length; i++) {
-        const violation = violations[i];
-        const row = violation.line-nodeStart.line;
-        const col = violation.column;
-        const replaceWith = getReplaceWith({
-            nodeText: lineTexts[row],
-            violationOffset: col,
-        });
-        if (!replaceWith) continue;
-        chars[row][col] = replaceWith;
-    }
-    
-    const fixedLines = [];
-    for (let i=0; i<chars.length; i++) {
-        const rowText = chars[i].join("");
-        fixedLines.push(rowText);
-    }
-    return fixedLines.join("\n");
-};
-
-const fixNode = ({ node, nodeText, violations }) => fixer => {
+const getFixedNodeText = (nodeText) => {
     const fixedNodeText = nodeText.split("");
-    const nodeStart = node.loc.start;
-    const nodeEnd = node.loc.end;
+    const entitiesReplaced = new Map();
+    for (let i=0; i<nodeText.length; i++) {
+        const char = nodeText[i];
 
-    if (nodeStart.line !== nodeEnd.line) {
-        const fixedNodeText = getFixedMultilineNodeText({ node, nodeText, violations });
-        return fixer.replaceText(node, fixedNodeText);
-    }
-    
-    for (let i=0; i<violations.length; i+=1) {
-        const violationCol = violations[i].column;
-        const offset = violationCol - nodeStart.column;
-        const replaceWith = getReplaceWith({ 
-            nodeText,
-            violationOffset: offset,
-        });
+        const replaceWith = ENTITIES.get(nodeText[i]);
+      
         if (!replaceWith) continue;
-        fixedNodeText[offset] = replaceWith;
-    }
-    return fixer.replaceText(node, fixedNodeText.join(""));
-};
   
+        if (!entitiesReplaced.get(char)) {
+            entitiesReplaced.set(char, 0);
+        }
+  
+        if (typeof replaceWith === "string") {
+            fixedNodeText[i] = replaceWith;
+        } else {
+            console.log(entitiesReplaced.get(char));
+            fixedNodeText[i] = replaceWith[entitiesReplaced.get(char) % 2];
+        }
+      
+        entitiesReplaced.set(char, entitiesReplaced.get(char)+1);
+      
+    }
+    return fixedNodeText.join("");
+};
 
 const getReports = ({ context, node }) => {
     const violations = getViolations({ context, node });
@@ -146,11 +96,11 @@ const getReports = ({ context, node }) => {
                     column: column+1,
                 },
             },
-            fix: fixNode({
-                node,
-                nodeText: context.getSourceCode().getText(node),
-                violations,
-            }),
+            fix: fixer => {
+                return fixer.replaceText(
+                    node, getFixedNodeText(context.getSourceCode().getText(node)),
+                );
+            },
         });
 
     }   
