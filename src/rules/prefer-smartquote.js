@@ -14,6 +14,24 @@ const ENTITIES = new Map([
     [APOSTROPHE, SMART_APOSTROPHE], 
 ]);
 
+const getExcludedRanges = (node) =>  {
+    let excludedRanges = [];
+  
+    const addToExcludedRanges = (node) => {
+        if (!node.raw && !node.children) {
+            excludedRanges.push(node.loc);
+        }
+        if (!node.children) return;
+        for (let i=0; i<node.children.length; i++) {
+            const child = node.children[i];
+            excludedRanges = excludedRanges.concat(getExcludedRanges(child));
+        }
+    };
+    addToExcludedRanges(node);
+    
+    return excludedRanges;
+};
+
 const shouldExclude = ({excludedRanges, candidateLoc}) => {
     const {line, column} = candidateLoc;
     for (let i=0; i<excludedRanges.length; i+=1) {
@@ -30,11 +48,10 @@ const shouldExclude = ({excludedRanges, candidateLoc}) => {
     return false;
 };
 
-const getViolations = ({context, node}) => {
+const getViolations = ({ context, node, excludedRanges }) => {
     const violations = [];
 
     const { start, end } = node.loc;
-    const excludedRanges = node.children.filter(child => !child.raw).map(({loc}) => loc);
 
     for (let line=start.line-1; line<end.line; line++) {
         const lineText = context.getSourceCode().lines[line];
@@ -51,8 +68,7 @@ const getViolations = ({context, node}) => {
     return violations;
 };
 
-const getFixedNodeText = ({ node, nodeText }) => {
-    const excludedRanges = node.children.filter(child => !child.raw).map(({loc}) => loc);
+const getFixedNodeText = ({ node, nodeText, excludedRanges }) => {
   
     // initialize
     let row = node.loc.start.line;
@@ -99,7 +115,8 @@ const getFixedNodeText = ({ node, nodeText }) => {
 };
 
 const getReports = ({ context, node }) => {
-    const violations = getViolations({ context, node });
+    const excludedRanges = getExcludedRanges(node);
+    const violations = getViolations({ context, node, excludedRanges });
     for (let j=0; j<violations.length; j+=1) {
         const {line, column } = violations[j]; 
         
@@ -121,6 +138,7 @@ const getReports = ({ context, node }) => {
                     node, getFixedNodeText({
                         node, 
                         nodeText:context.getSourceCode().getText(node),
+                        excludedRanges,
                     }),
                 );
             },
