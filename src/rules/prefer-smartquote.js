@@ -69,11 +69,11 @@ const getViolations = ({ context, node, excludedRanges }) => {
     return violations;
 };
 
-const getFixedNodeText = ({ node, nodeText, excludedRanges }) => {
+const getFixedNodeText = ({ node, nodeText, excludedRanges}) => {
   
     // initialize
     let row = node.loc.start.line;
-  
+
     const startCol = node.loc.start.column;
     let col = startCol;
   
@@ -84,27 +84,28 @@ const getFixedNodeText = ({ node, nodeText, excludedRanges }) => {
         const char = nodeText[i];
             
         const replaceWith = ENTITIES.get(nodeText[i]);
+  
         const candidateLocCol = (node.loc.start.line!==node.loc.end.line) ? col-startCol : col;
         const candidateLoc = {
             line: row,
             column: candidateLocCol,
         };
-
         const shouldReplace = !shouldExclude({excludedRanges, candidateLoc});
+  
         if (shouldReplace && replaceWith) {
-           
+            
             if (!entitiesReplaced.get(char)) {
                 entitiesReplaced.set(char, 0);
             }
-        
             if (typeof replaceWith === "string") {
                 fixedNodeText[i] = replaceWith;
             } else {
                 fixedNodeText[i] = replaceWith[entitiesReplaced.get(char) % 2];
             }
-        
+      
             entitiesReplaced.set(char, entitiesReplaced.get(char)+1);
         }
+  
         if (char === "\n") {
             row++;
             col = startCol;
@@ -112,10 +113,11 @@ const getFixedNodeText = ({ node, nodeText, excludedRanges }) => {
             col++;
         }
     }
-    return fixedNodeText.join("");
+    return fixedNodeText.join(""); 
 };
 
 const getReports = ({ context, node }) => {
+    const nodeText = context.getSourceCode().getText(node);
     const excludedRanges = getExcludedRanges(node);
     const violations = getViolations({ context, node, excludedRanges });
     for (let i=0; i<violations.length; i+=1) {
@@ -134,18 +136,12 @@ const getReports = ({ context, node }) => {
                     column: column+1,
                 },
             },
-            fix: fixer => {
-                return fixer.replaceText(
-                    node, getFixedNodeText({
-                        node, 
-                        nodeText:context.getSourceCode().getText(node),
-                        excludedRanges,
-                    }),
-                );
-            },
+            fix: fixer => fixer.replaceText(
+                node,
+                getFixedNodeText({ node, nodeText, excludedRanges }),    
+            ),
         });
-
-    }   
+    }
 };
 
 const getViolationsOnTaggedNode = (node) => {
@@ -164,9 +160,11 @@ const getViolationsOnTaggedNode = (node) => {
 
 const reportTaggedNode = ({context, node}) => {
     const violations = getViolationsOnTaggedNode(node);
+    const nodeText = context.getSourceCode().getText(node);
+    const excludedRanges = node.quasi.expressions.map(({loc}) => loc);
+
     for (let i=0; i<violations.length; i+=1) {
-        const {line, column} = violations[i];
-        //const column = node.loc.start.column
+        const { line, column } = violations[i];
         context.report({
             node,
             message: "Prefer smartquote.",
@@ -180,6 +178,10 @@ const reportTaggedNode = ({context, node}) => {
                     column: column+1,
                 },
             },
+            fix: fixer => fixer.replaceText(
+                node,
+                getFixedNodeText({ node, nodeText, excludedRanges }),
+            ),
         });
     }
 };
