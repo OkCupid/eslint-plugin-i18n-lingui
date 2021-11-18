@@ -1,6 +1,7 @@
 "use strict";
 
 const hasOpeningElementTrans = require("../util/hasOpeningElementTrans");
+const isTaggedNode = require("../util/isTaggedNode");
 
 const DOUBLE_QUOTE = "\"";
 const OPEN_SMART_QUOTE = "“";
@@ -117,8 +118,8 @@ const getFixedNodeText = ({ node, nodeText, excludedRanges }) => {
 const getReports = ({ context, node }) => {
     const excludedRanges = getExcludedRanges(node);
     const violations = getViolations({ context, node, excludedRanges });
-    for (let j=0; j<violations.length; j+=1) {
-        const {line, column } = violations[j]; 
+    for (let i=0; i<violations.length; i+=1) {
+        const { line, column } = violations[i]; 
         
         context.report({
             node,
@@ -147,6 +148,41 @@ const getReports = ({ context, node }) => {
     }   
 };
 
+const getViolationsOnTaggedNode = (node) => {
+    let violations = [];
+    const { quasis } = node.quasi;
+    for (let i=0; i<quasis.length; i+=1) {
+        const { value, loc } = quasis[i];
+        for (let j=0; j<value.raw.length; j+=1) {
+            if (ENTITIES.has(value.raw[j])) {
+                violations.push({line: loc.start.line, column: loc.start.column+j+1 });
+            }
+        }
+    }
+    return violations;
+};
+
+const reportTaggedNode = ({context, node}) => {
+    const violations = getViolationsOnTaggedNode(node);
+    for (let i=0; i<violations.length; i+=1) {
+        const {line, column} = violations[i];
+        //const column = node.loc.start.column
+        context.report({
+            node,
+            message: "Prefer smartquote.",
+            loc: {
+                start: {
+                    line,
+                    column,
+                },
+                end: {
+                    line,
+                    column: column+1,
+                },
+            },
+        });
+    }
+};
 module.exports = {
     meta: {
         docs: {
@@ -160,6 +196,11 @@ module.exports = {
             JSXElement(node) {
                 if (hasOpeningElementTrans(node)) {
                     getReports({context, node});
+                }
+            },
+            TaggedTemplateExpression(node) {
+                if (isTaggedNode(node)) {
+                    reportTaggedNode({context, node});
                 }
             },
         };
