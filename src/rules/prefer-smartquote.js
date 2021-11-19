@@ -125,7 +125,7 @@ const getFixedNodeText = ({ node, nodeText, includedRanges }) => {
     return fixedNodeText.join(""); 
 };
 
-const getReports = ({ context, node }) => {
+const reportTransNode = ({ context, node }) => {
     const nodeText = context.getSourceCode().getText(node);
     const includedRanges = getIncludedRanges(node);
     const violations = getViolations({ context, node, includedRanges });
@@ -167,7 +167,7 @@ const getViolationsOnTaggedNode = (node) => {
     return violations;
 };
 
-const reportTaggedNode = ({context, node}) => {
+const reportTaggedNode = ({ context, node }) => {
     const violations = getViolationsOnTaggedNode(node);
     const nodeText = context.getSourceCode().getText(node);
     const includedRanges = node.quasi.quasis.map(({loc}) => loc);
@@ -206,12 +206,12 @@ module.exports = {
         return {
             JSXElement(node) {
                 if (hasOpeningElementTrans(node)) {
-                    getReports({context, node});
+                    reportTransNode({ context, node });
                 }
             },
             TaggedTemplateExpression(node) {
                 if (isTaggedNode(node)) {
-                    reportTaggedNode({context, node});
+                    reportTaggedNode({ context, node });
                 }
             },
         };
