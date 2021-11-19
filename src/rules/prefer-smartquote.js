@@ -15,41 +15,50 @@ const ENTITIES = new Map([
     [APOSTROPHE, SMART_APOSTROPHE], 
 ]);
 
-const getExcludedRanges = (node) =>  {
-    let excludedRanges = [];
+const getIncludedRanges = (node) =>  {
+    let ranges = [];
   
-    const addToExcludedRanges = (node) => {
-        if (!node.raw && !node.children) {
-            excludedRanges.push(node.loc);
+    const addToRanges = (node) => {
+        if (node.raw && !node.children) {
+            ranges.push(node.loc);
         }
         if (!node.children) return;
         for (let i=0; i<node.children.length; i++) {
             const child = node.children[i];
-            excludedRanges = excludedRanges.concat(getExcludedRanges(child));
+            ranges = ranges.concat(getIncludedRanges(child));
         }
     };
-    addToExcludedRanges(node);
+    addToRanges(node);
     
-    return excludedRanges;
+    return ranges;
 };
 
-const shouldExclude = ({excludedRanges, candidateLoc}) => {
+const shouldInclude = ({ includedRanges, candidateLoc}) => {
     const {line, column} = candidateLoc;
-    for (let i=0; i<excludedRanges.length; i+=1) {
-        const {start, end} = excludedRanges[i];
-        if (
-            line >= start.line 
-            && line <= end.line
-            && column >= start.column 
-            && column < end.column
-        ) {
+    for (let i=0; i<includedRanges.length; i+=1) {
+        const {start, end} = includedRanges[i];
+        if (line>start.line && line<end.line) {
             return true;
+        }
+        // one line
+        if (start.line === end.line) {
+            if (column>=start.column && column<end.column) {
+                return true;  
+            }
+        } else {
+            // multi-line
+            if (line === start.line && column >= start.column) {
+                return true;
+            }
+            if (line === end.line && column < end.column) {
+                return true;
+            }
         }
     }
     return false;
 };
 
-const getViolations = ({ context, node, excludedRanges }) => {
+const getViolations = ({ context, node, includedRanges }) => {
     const violations = [];
 
     const { start, end } = node.loc;
@@ -60,7 +69,7 @@ const getViolations = ({ context, node, excludedRanges }) => {
             const candidateLoc = {line: line+1, column: i};
             if (
                 ENTITIES.has(lineText[i]) 
-                && !shouldExclude({excludedRanges, candidateLoc})
+                && shouldInclude({includedRanges, candidateLoc})
             ) {
                 violations.push(candidateLoc);
             }
@@ -69,7 +78,7 @@ const getViolations = ({ context, node, excludedRanges }) => {
     return violations;
 };
 
-const getFixedNodeText = ({ node, nodeText, excludedRanges}) => {
+const getFixedNodeText = ({ node, nodeText, includedRanges }) => {
   
     // initialize
     let row = node.loc.start.line;
@@ -90,10 +99,10 @@ const getFixedNodeText = ({ node, nodeText, excludedRanges}) => {
             line: row,
             column: candidateLocCol,
         };
-        const shouldReplace = !shouldExclude({excludedRanges, candidateLoc});
+
+        const shouldReplace = shouldInclude({ includedRanges, candidateLoc });
   
         if (shouldReplace && replaceWith) {
-            
             if (!entitiesReplaced.get(char)) {
                 entitiesReplaced.set(char, 0);
             }
@@ -118,8 +127,8 @@ const getFixedNodeText = ({ node, nodeText, excludedRanges}) => {
 
 const getReports = ({ context, node }) => {
     const nodeText = context.getSourceCode().getText(node);
-    const excludedRanges = getExcludedRanges(node);
-    const violations = getViolations({ context, node, excludedRanges });
+    const includedRanges = getIncludedRanges(node);
+    const violations = getViolations({ context, node, includedRanges });
     for (let i=0; i<violations.length; i+=1) {
         const { line, column } = violations[i]; 
         
@@ -138,7 +147,7 @@ const getReports = ({ context, node }) => {
             },
             fix: fixer => fixer.replaceText(
                 node,
-                getFixedNodeText({ node, nodeText, excludedRanges }),    
+                getFixedNodeText({ node, nodeText, includedRanges }),    
             ),
         });
     }
@@ -161,7 +170,7 @@ const getViolationsOnTaggedNode = (node) => {
 const reportTaggedNode = ({context, node}) => {
     const violations = getViolationsOnTaggedNode(node);
     const nodeText = context.getSourceCode().getText(node);
-    const excludedRanges = node.quasi.expressions.map(({loc}) => loc);
+    const includedRanges = node.quasi.quasis.map(({loc}) => loc);
 
     for (let i=0; i<violations.length; i+=1) {
         const { line, column } = violations[i];
@@ -180,7 +189,7 @@ const reportTaggedNode = ({context, node}) => {
             },
             fix: fixer => fixer.replaceText(
                 node,
-                getFixedNodeText({ node, nodeText, excludedRanges }),
+                getFixedNodeText({ node, nodeText, includedRanges }),
             ),
         });
     }
