@@ -40,6 +40,7 @@ rules: {
 
 | Has Fixer | Rule                               | Description                                             |
 |-----------|------------------------------------|---------------------------------------------------------|
-|           | [no-eval-in-placeholder](/docs/rules/no-eval-in-placeholder.md)             | No evaluation of placeholder values in wrapped strings  |
-|    ✔️      | [i18n-lingui/prefer-unicode-ellipsis](/docs/rules/prefer-unicode-ellipsis.md) | Detects three periods in Trans or t tag wrapped strings |
+|           | [no-eval-in-placeholder](/docs/rules/no-eval-in-placeholder.md)             | No evaluation of placeholder values in wrapped strings.  |
+|    ✔️      | [prefer-unicode-ellipsis](/docs/rules/prefer-unicode-ellipsis.md) | Detects three periods (`...`) and replaces it with unicode ellipses (`…`) |
 |           | [no-useless-string-wrapping](/docs/rules/no-useless-string-wrapping.md)    | No wrapping a string that only contains an expression.  |
+|     ✔️     | [prefer-smartquote](/docs/rules/prefer-smartquote.md)    | Detects apostrophe `'` and double quotes `"` and replaces them with smartquotes.  |
