@@ -37,6 +37,9 @@ const shouldInclude = ({ includedRanges, candidateLoc}) => {
     const {line, column} = candidateLoc;
     for (let i=0; i<includedRanges.length; i+=1) {
         const {start, end} = includedRanges[i];
+
+        if (line<start.line || line>end.line) continue;
+
         if (line>start.line && line<end.line) {
             return true;
         }
