@@ -27,6 +27,9 @@
   "scripts": {
     "lint": "eslint ."
   },
+  "peerDependencies": {
+    "eslint": ">= 6"
+  },
   "devDependencies": {
     "eslint": "^8.2.0",
     "eslint-plugin-eslint-plugin": "^4.0.2",
